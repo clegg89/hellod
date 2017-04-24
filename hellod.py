@@ -10,10 +10,9 @@
 
 """
 
-import daemon
+from daemon import Daemon
 import time
 import datetime
-import os
 import sys
 import signal
 
@@ -22,17 +21,20 @@ def get_timestamp():
 
 def sigterm_cleanup(signal, frame):
     print get_timestamp() + ' Received SIGTERM, Exit'
+    sys.stdout.flush()
     sys.exit(0)
 
 signal_map = {
         signal.SIGTERM : sigterm_cleanup
         }
 
-with open('/tmp/hellod.log', 'a') as log:
-    log.write(get_timestamp() + " Start" + os.linesep)
-    log.flush()
-    with daemon.DaemonContext(signal_map=signal_map, stdout=log) as d:
+class Hello(Daemon):
+    def run(self):
+        print get_timestamp() + " Start"
         while True:
             print get_timestamp() + " Hello, World!"
             sys.stdout.flush()
             time.sleep(30)
+
+hellod = Hello(pidfile='/var/run/hellod.pid', stdout='/tmp/hellod.log')
+hellod.start()
