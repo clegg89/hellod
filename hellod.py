@@ -24,13 +24,11 @@ def sigterm_cleanup(signal, frame):
     sys.stdout.flush()
     sys.exit(0)
 
-signal_map = {
-        signal.SIGTERM : sigterm_cleanup
-        }
-
 class Hello(Daemon):
     def run(self):
         print get_timestamp() + " Start"
+        signal.signal(signal.SIGTERM, sigterm_cleanup)
+        signal.signal(signal.SIGINT, sigterm_cleanup)
         while True:
             print get_timestamp() + " Hello, World!"
             sys.stdout.flush()
